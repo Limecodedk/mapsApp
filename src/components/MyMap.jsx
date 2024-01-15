@@ -139,10 +139,8 @@ const MyMap = () => {
             </Popup>
           </Marker>
         ))}
-
-        <MyCamera position={[myPosition.latitude, myPosition.longitude]} />
-
       </MapContainer>
+      <MyCamera position={[myPosition.latitude, myPosition.longitude]} />
     </div >
   )
 }
