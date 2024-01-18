@@ -11,12 +11,16 @@ import { defineCustomElements } from "@ionic/pwa-elements/loader"
 import { useEffect, useState } from "react";
 import { gsap } from "gsap";
 import FormData from "./FormData";
+import { uploadFile } from "./GetData";
 
 const MyCamera = ({ position }) => {
   const [photos, setPhotos] = useState("");
+  const [pos, setPos] = useState([]);
+  const [filenameDB, setFilenameDB] = useState("")
 
   useEffect(() => {
     defineCustomElements(window);
+    setPos(position)
   }, [])
 
   const takePhoto = async () => {
@@ -36,7 +40,7 @@ const MyCamera = ({ position }) => {
       duration: 1,
       rotation: 2,
       ease: "elastic.out"
-    })
+    });
 
   }
 
@@ -44,14 +48,15 @@ const MyCamera = ({ position }) => {
     setPhotos("")
   }
 
-  const uploadImage = (path) => {
+  const uploadImage = async (path) => {
+    uploadFile(path, "image-myPlaceApp")
+      .then(response => setFilenameDB(response))
     document.querySelector("#myFormContainer").style.display = "grid";
   }
 
-
   return (
     <>
-      <FormData />
+      <FormData position={pos} img={filenameDB} />
 
       {photos ? (
         <div id="cameraimage">
@@ -60,8 +65,9 @@ const MyCamera = ({ position }) => {
           </div>
           <IonImg src={photos} />
           <div id="saveImgContainer">
-            <IonButton color="tertiary" onClick={uploadImage(photos)} >Gem billede</IonButton>
+            <IonButton color="tertiary" onClick={async () => { await uploadImage(photos); }} >Gem billed</IonButton>
           </div>
+          <div id="saved"><span>Gemmer Billede</span></div>
         </div >
       ) : (
         <></>

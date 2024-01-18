@@ -6,8 +6,9 @@ import "leaflet/dist/leaflet.css";
 
 import { Geolocation } from '@capacitor/geolocation';
 
-import { IonLoading, IonRow } from '@ionic/react';
+import { IonLoading, IonRow, IonImg } from '@ionic/react';
 import MyCamera from './MyCamera';
+import { fetchLocation } from './GetData';
 
 const markerPositions = [
   {
@@ -63,6 +64,7 @@ const MyMap = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [myPosition, setMyPosition] = useState(null);
+  const [dbData, setDbData] = useState([])
 
 
   const [showLoading, setShowLoading] = useState(true);
@@ -81,7 +83,6 @@ const MyMap = () => {
       }
     })()
 
-    /* setMySpot(L.icon({ iconUrl: "/assets/my-icon.png" })); */
 
     const myspot = L.icon({
       iconUrl: '/assets/my-icon.png',
@@ -100,6 +101,9 @@ const MyMap = () => {
     setMySpot(myspot)
     setSpot(spot)
 
+    fetchLocation("mapmyplace")
+      .then(response => setDbData(response));
+
   }, [])
 
 
@@ -114,19 +118,23 @@ const MyMap = () => {
       />
     );
 
-  if (error) return <div>errror</div>
+  //if (error) return <div>Der er sket en fejl</div>
 
   return (
-    <div id='content'>
-      <MapContainer center={position} zoom={7} scrollWheelZoom={true} >
+    < div id='content' >
+      <MapContainer center={position} zoom={7} scrollWheelZoom={true}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <Marker
-          position={[myPosition.latitude, myPosition.longitude]}
-          icon={myspot}
-        >
-          <Popup>Im here</Popup>
-        </Marker>
-        {markerPositions.map((data, index) => (
+
+        {myPosition && (
+          <Marker
+            position={[myPosition.latitude, myPosition.longitude]}
+            icon={myspot}
+          >
+            <Popup>Im here</Popup>
+          </Marker>
+        )}
+
+        {dbData.map((data, index) => (
           <Marker
             key={"map" + index}
             id="animate"
@@ -134,13 +142,20 @@ const MyMap = () => {
             icon={spot}
           >
             <Popup>
+              <IonRow>
+                <IonImg
+                  src={
+                    "https://aqhovmkjkvytcnixsmij.supabase.in/storage/v1/object/public/image-myPlaceApp/" + data.image
+                  }
+                />
+              </IonRow>
               <IonRow className="headline">{data.location}</IonRow>
               <IonRow className="comment">{data.name}</IonRow>
             </Popup>
           </Marker>
         ))}
       </MapContainer>
-      <MyCamera position={[myPosition.latitude, myPosition.longitude]} />
+      <MyCamera position={myPosition && [myPosition.latitude, myPosition.longitude]} />
     </div >
   )
 }
